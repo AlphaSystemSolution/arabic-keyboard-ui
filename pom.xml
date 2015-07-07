@@ -34,6 +34,6 @@
 		<arabic-support.version>${project.version}</arabic-support.version>
 		<commons-ui.version>${project.version}</commons-ui.version>
 		<maven.test.skip>true</maven.test.skip>
-		<mainClass>com.alphasystem.arabickeyboard.ui.ArabicKeyboardFrame</mainClass>
+		<mainClass>com.alphasystem.arabickeyboard.ui.KeyboardApp</mainClass>
 	</properties>
 </project>
