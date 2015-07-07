@@ -2,14 +2,19 @@ package com.alphasystem.arabickeyboard.ui;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import static javafx.geometry.NodeOrientation.RIGHT_TO_LEFT;
 import static javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED;
+import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 import static javafx.scene.input.KeyEvent.KEY_TYPED;
 import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontPosture.REGULAR;
@@ -36,22 +41,25 @@ public class KeyboardApp extends Application {
         textArea.setFont(font("Traditional Arabic", BOLD, REGULAR, 30));
         textArea.setNodeOrientation(RIGHT_TO_LEFT);
         textArea.setFocusTraversable(false);
-        textArea.setPrefColumnCount(30);
+        textArea.setPrefColumnCount(50);
         //textArea.setPrefRowCount(10);
         ScrollPane scrollPane = new ScrollPane(textArea);
         scrollPane.setVbarPolicy(AS_NEEDED);
         scrollPane.setHbarPolicy(AS_NEEDED);
+        scrollPane.setNodeOrientation(RIGHT_TO_LEFT);
         textArea.setStyle("-fx-border-color: transparent; -fx-border-radius: 2; -fx-border-insets: 6, 6, 6, 6; " +
-                "-fx-border-style: solid inside, dotted outside;");
+                "-fx-border-style: solid inside, solid outside;");
 
         Keyboard keyboard = new Keyboard(textArea);
 
         final VBox keyboardView = keyboard.view();
+        keyboardView.setStyle("-fx-border-color: transparent; -fx-border-radius: 2; -fx-border-insets: 6, 6, 6, 6; " +
+                "-fx-border-style: solid inside, dotted outside;");
         keyboardView.setOnMouseClicked(event -> keyboardView.requestFocus());
-        root.getChildren().addAll(keyboardView, scrollPane);
+        root.getChildren().addAll(keyboardView, scrollPane, createButtonPane(textArea));
 
         primaryStage.setScene(scene);
-        primaryStage.show();
+        primaryStage.setResizable(false);
 
         keyboard.setAccelerators();
         textArea.addEventFilter(KEY_TYPED, event -> {
@@ -61,5 +69,40 @@ public class KeyboardApp extends Application {
                 event.consume();
             }
         });
+
+        textArea.addEventFilter(KEY_PRESSED, event -> {
+            if (event.isShiftDown()) {
+                keyboard.shiftPressed();
+            }
+        });
+
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        primaryStage.setX(bounds.getMinX());
+        primaryStage.setY(bounds.getMinY());
+        primaryStage.setWidth(bounds.getWidth() * 0.60);
+        primaryStage.setHeight(bounds.getHeight() * 0.80);
+        primaryStage.show();
     }
+
+    private HBox createButtonPane(TextArea textArea) {
+        HBox hBox = new HBox();
+        hBox.setSpacing(10);
+        hBox.setPadding(new Insets(10));
+
+        Button button = new Button("Copy");
+        button.setFont(font("Georgia", 20));
+        button.setOnAction(event -> {
+            textArea.selectAll();
+            textArea.copy();
+        });
+        hBox.getChildren().add(button);
+
+        button = new Button("Paste");
+        button.setFont(font("Georgia", 20));
+        button.setOnAction(event -> textArea.paste());
+        hBox.getChildren().add(button);
+
+        return hBox;
+    }
+
 }

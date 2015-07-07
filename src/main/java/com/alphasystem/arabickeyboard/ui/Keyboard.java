@@ -140,6 +140,10 @@ public class Keyboard {
         return keyboardRow;
     }
 
+    public void shiftPressed() {
+        shift1.setSelected(true);
+    }
+
     public VBox view() {
         return vBox;
     }
