@@ -38,11 +38,10 @@ public class KeyboardApp extends Application {
         Scene scene = new Scene(root);
 
         TextArea textArea = new TextArea();
-        textArea.setFont(font("Traditional Arabic", BOLD, REGULAR, 30));
+        textArea.setFont(font("Arabic Typesetting", BOLD, REGULAR, 36));
         textArea.setNodeOrientation(RIGHT_TO_LEFT);
         textArea.setFocusTraversable(false);
         textArea.setPrefColumnCount(50);
-        //textArea.setPrefRowCount(10);
         ScrollPane scrollPane = new ScrollPane(textArea);
         scrollPane.setVbarPolicy(AS_NEEDED);
         scrollPane.setHbarPolicy(AS_NEEDED);

@@ -154,9 +154,8 @@ public class Keyboard {
     private void addRow(KeyboardRow keyboardRow, Key key) {
         final Button button = key.getButton();
         button.setOnAction(event -> {
-            KeyEvent keyEvent = new KeyEvent(button, target, KEY_TYPED, key.getText(), key.getText(),
-                    key.getKeyCode(), false, false, false, false);
-            target.fireEvent(keyEvent);
+            initKeyEvent(button, KEY_TYPED, key.getText(), key.getText(), key.getKeyCode(),
+                    false, false, false, false);
             if (key.isShiftPressed()) {
                 shift1.setSelected(false);
             }
