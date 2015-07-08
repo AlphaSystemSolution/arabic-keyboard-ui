@@ -9,10 +9,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
+import java.util.List;
+
 import static com.alphasystem.arabic.model.ArabicLetterType.*;
 import static com.alphasystem.arabic.model.ArabicWord.getWord;
 import static com.alphasystem.arabic.model.DiacriticType.*;
 import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCode.COMMA;
 import static javafx.scene.input.KeyEvent.KEY_TYPED;
@@ -24,7 +27,7 @@ import static javafx.scene.text.FontWeight.BOLD;
  */
 public class Keyboard {
 
-    private Key[] buttonRow1 = new Key[]{
+    private List<Key> buttonRow1 = asList(
             new Key(DDAD.toUnicode(), FATHA.toUnicode(), Q),
             new Key(SAD.toUnicode(), FATHATAN.toUnicode(), W),
             new Key(THA.toUnicode(), DAMMA.toUnicode(), E),
@@ -37,10 +40,9 @@ public class Keyboard {
             new Key(HA.toUnicode(), valueOf('\u061B'), P),
             new Key(JEEM.toUnicode(), valueOf('\u007B'), OPEN_BRACKET),
             new Key(DAL.toUnicode(), valueOf('\u007D'), CLOSE_BRACKET),
-            new Key(THAL.toUnicode(), SHADDA.toUnicode(), BACK_SLASH)
-    };
+            new Key(THAL.toUnicode(), SHADDA.toUnicode(), BACK_SLASH));
 
-    private Key[] buttonRow2 = new Key[]{
+    private List<Key> buttonRow2 = asList(
             new Key(SHEEN.toUnicode(), valueOf("\u005C\u005C"), A),
             new Key(SEEN.toUnicode(), valueOf(' '), S),
             new Key(YA.toUnicode(), valueOf('\u005D'), D),
@@ -51,10 +53,9 @@ public class Keyboard {
             new Key(NOON.toUnicode(), valueOf('\u060C'), K),
             new Key(MEEM.toUnicode(), valueOf('\u002F'), L),
             new Key(KAF.toUnicode(), valueOf((char) 0x3B), SEMICOLON),
-            new Key(TTA.toUnicode(), valueOf('\u0022'), QUOTE)
-    };
+            new Key(TTA.toUnicode(), valueOf('\u0022'), QUOTE));
 
-    private Key[] buttonRow3 = new Key[]{
+    private List<Key> buttonRow3 = asList(
             new Key(YA_HAMZA_ABOVE.toUnicode(), valueOf('\u007E'), Z),
             new Key(HAMZA.toUnicode(), SUKUN.toUnicode(), X),
             new Key(WAW_HAMZA_ABOVE.toUnicode(), KASRA.toUnicode(), C),
@@ -64,8 +65,7 @@ public class Keyboard {
             new Key(TA_MARBUTA.toUnicode(), valueOf('\u2019'), M),
             new Key(WAW.toUnicode(), valueOf('\u002C'), COMMA),
             new Key(ZAIN.toUnicode(), valueOf('\u002E'), PERIOD),
-            new Key(DTHA.toUnicode(), valueOf('\u061F'), SLASH)
-    };
+            new Key(DTHA.toUnicode(), valueOf('\u061F'), SLASH));
 
     private ToggleButton shift1 = createShiftButton();
     private ToggleButton shift2 = createShiftButton();
@@ -97,47 +97,37 @@ public class Keyboard {
     private void initBindings() {
         shift1.selectedProperty().bindBidirectional(shift2.selectedProperty());
         vBox.addEventFilter(KeyEvent.KEY_PRESSED, event -> shift1.setSelected(event.isShiftDown()));
-        for (Key key : buttonRow1) {
-            key.shiftPressedProperty().bind(shift1.selectedProperty());
-        }
-        for (Key key : buttonRow2) {
-            key.shiftPressedProperty().bind(shift1.selectedProperty());
-        }
-        for (Key key : buttonRow3) {
-            key.shiftPressedProperty().bind(shift1.selectedProperty());
-        }
+        buttonRow1.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
+        buttonRow2.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
+        buttonRow3.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
     }
 
     /**
      *
      */
     public void setAccelerators() {
-        for (Key key : buttonRow1) {
-            key.setAccelerator();
-        }
-        for (Key key : buttonRow2) {
-            key.setAccelerator();
-        }
-        for (Key key : buttonRow3) {
-            key.setAccelerator();
-        }
+        buttonRow1.forEach(Key::setAccelerator);
+        buttonRow2.forEach(Key::setAccelerator);
+        buttonRow3.forEach(Key::setAccelerator);
     }
 
-    private KeyboardRow addRow(Key[] row) {
+    private KeyboardRow addRow(List<Key> row) {
         KeyboardRow keyboardRow = new KeyboardRow();
-        for (Key key : row) {
-            final Button button = key.getButton();
-            button.setOnAction(event -> {
-                KeyEvent keyEvent = new KeyEvent(button, target, KEY_TYPED, key.getText(), key.getText(),
-                        key.getKeyCode(), false, false, false, false);
-                target.fireEvent(keyEvent);
-                if (key.isShiftPressed()) {
-                    shift1.setSelected(false);
-                }
-            });
-            keyboardRow.addKey(key);
-        }
+        row.forEach(key -> addRow(keyboardRow, key));
         return keyboardRow;
+    }
+
+    private void addRow(KeyboardRow keyboardRow, Key key) {
+        final Button button = key.getButton();
+        button.setOnAction(event -> {
+            KeyEvent keyEvent = new KeyEvent(button, target, KEY_TYPED, key.getText(), key.getText(),
+                    key.getKeyCode(), false, false, false, false);
+            target.fireEvent(keyEvent);
+            if (key.isShiftPressed()) {
+                shift1.setSelected(false);
+            }
+        });
+        keyboardRow.addKey(key);
     }
 
     public void shiftPressed() {
