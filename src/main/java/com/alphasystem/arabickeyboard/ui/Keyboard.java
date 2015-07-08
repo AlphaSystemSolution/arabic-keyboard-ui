@@ -1,13 +1,15 @@
 package com.alphasystem.arabickeyboard.ui;
 
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 
 import java.util.List;
 
@@ -18,7 +20,8 @@ import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCode.COMMA;
-import static javafx.scene.input.KeyEvent.KEY_TYPED;
+import static javafx.scene.input.KeyEvent.*;
+import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
 
@@ -69,6 +72,7 @@ public class Keyboard {
 
     private ToggleButton shift1 = createShiftButton();
     private ToggleButton shift2 = createShiftButton();
+    private Button backspace = createButton("Backspace");
     private Node target;
     private VBox vBox;
 
@@ -78,10 +82,14 @@ public class Keyboard {
         vBox.setSpacing(10);
         vBox.setPadding(new Insets(10, 10, 10, 10));
 
-        HBox row3 = addRow(buttonRow3).view();
+        final HBox row2 = addRow(buttonRow2).view();
+        row2.getChildren().add(backspace);
+
+        final HBox row3 = addRow(buttonRow3).view();
         row3.getChildren().add(0, shift1);
         row3.getChildren().add(shift2);
-        vBox.getChildren().addAll(addRow(buttonRow1).view(), addRow(buttonRow2).view(), row3);
+
+        vBox.getChildren().addAll(addRow(buttonRow1).view(), row2, row3);
 
         initBindings();
     }
@@ -89,9 +97,17 @@ public class Keyboard {
     private static ToggleButton createShiftButton() {
         ToggleButton toggleButton = new ToggleButton("Shift");
         toggleButton.setStyle("-fx-base: beige;");
-        toggleButton.setPrefSize(96, 48);
-        toggleButton.setFont(Font.font("Candara", BOLD, REGULAR, 12));
+        toggleButton.setPrefSize(128, 48);
+        toggleButton.setFont(font("Candara", BOLD, REGULAR, 12));
         return toggleButton;
+    }
+
+    private Button createButton(String text) {
+        Button button = new Button(text);
+        button.setFont(font("Candara", BOLD, REGULAR, 12));
+        button.setPrefSize(128, 48);
+        button.setStyle("font-variant: small-caps");
+        return button;
     }
 
     private void initBindings() {
@@ -109,6 +125,24 @@ public class Keyboard {
         buttonRow1.forEach(Key::setAccelerator);
         buttonRow2.forEach(Key::setAccelerator);
         buttonRow3.forEach(Key::setAccelerator);
+        backspace.setOnAction(event -> initKeyEvent(backspace, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
+                BACK_SPACE, false, false, false, false));
+        backspace.getScene().getAccelerators().put(new KeyCodeCombination(BACK_SPACE), () -> fire(backspace));
+    }
+
+    private void fire(Button button) {
+        button.arm();
+        button.fire();
+        button.disarm();
+    }
+
+    private void initKeyEvent(Button button, EventType<KeyEvent> eventType, String character,
+                              String text, KeyCode keyCode, boolean shiftDown, boolean controlDown,
+                              boolean altDown, boolean metaDown) {
+        KeyEvent keyEvent = new KeyEvent(button, target, eventType, character, text,
+                keyCode, shiftDown, controlDown,
+                altDown, metaDown);
+        target.fireEvent(keyEvent);
     }
 
     private KeyboardRow addRow(List<Key> row) {
