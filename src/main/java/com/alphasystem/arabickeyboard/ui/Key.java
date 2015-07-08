@@ -32,7 +32,9 @@ public class Key {
         shiftPressed = new SimpleBooleanProperty();
         this.keyCode = keyCode;
 
-        button.textProperty().bind(when(shiftPressedProperty()).then(alternateText).otherwise(defaultText));
+        String at = alternateText != null ? alternateText : defaultText;
+
+        button.textProperty().bind(when(shiftPressedProperty()).then(at).otherwise(defaultText));
         setShiftPressed(false);
     }
 
@@ -45,11 +47,13 @@ public class Key {
     }
 
     public void setAccelerator() {
-        button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), () -> {
-            button.arm();
-            button.fire();
-            button.disarm();
-        });
+        if (keyCode != null) {
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), () -> {
+                button.arm();
+                button.fire();
+                button.disarm();
+            });
+        }
     }
 
     public KeyCode getKeyCode() {
