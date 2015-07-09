@@ -16,11 +16,14 @@ import java.util.List;
 import static com.alphasystem.arabic.model.ArabicLetterType.*;
 import static com.alphasystem.arabic.model.ArabicWord.getWord;
 import static com.alphasystem.arabic.model.DiacriticType.*;
+import static java.lang.Double.POSITIVE_INFINITY;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyCode.COMMA;
+import static javafx.scene.input.KeyCode.SPACE;
 import static javafx.scene.input.KeyEvent.*;
+import static javafx.scene.layout.Priority.ALWAYS;
 import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
@@ -47,7 +50,7 @@ public class Keyboard {
 
     private List<Key> buttonRow2 = asList(
             new Key(SHEEN.toUnicode(), valueOf("\u005C\u005C"), A),
-            new Key(SEEN.toUnicode(), valueOf(' '), S),
+            new Key(SEEN.toUnicode(), ALIF_KHAN_JAREEYA.toUnicode(), S),
             new Key(YA.toUnicode(), valueOf('\u005D'), D),
             new Key(BA.toUnicode(), valueOf('\u005B'), F),
             new Key(LAM.toUnicode(), getWord(LAM, ALIF_HAMZA_ABOVE).toUnicode(), G),
@@ -70,9 +73,10 @@ public class Keyboard {
             new Key(ZAIN.toUnicode(), valueOf('\u002E'), PERIOD),
             new Key(DTHA.toUnicode(), valueOf('\u061F'), SLASH));
 
-    private ToggleButton shift1 = createShiftButton();
-    private ToggleButton shift2 = createShiftButton();
-    private Button backspace = createButton("Backspace");
+    private ToggleButton shift1;
+    private ToggleButton shift2;
+    private Button backspace;
+    private Button spaceBar;
     private Node target;
     private VBox vBox;
 
@@ -82,6 +86,14 @@ public class Keyboard {
         vBox.setSpacing(10);
         vBox.setPadding(new Insets(10, 10, 10, 10));
 
+        shift1 = createShiftButton();
+        shift2 = createShiftButton();
+        backspace = createButton("Backspace");
+        backspace.setPrefSize(128, 48);
+        spaceBar = createButton("");
+        spaceBar.setMaxWidth(POSITIVE_INFINITY);
+        HBox.setHgrow(spaceBar, ALWAYS);
+
         final HBox row2 = addRow(buttonRow2).view();
         row2.getChildren().add(backspace);
 
@@ -89,7 +101,7 @@ public class Keyboard {
         row3.getChildren().add(0, shift1);
         row3.getChildren().add(shift2);
 
-        vBox.getChildren().addAll(addRow(buttonRow1).view(), row2, row3);
+        vBox.getChildren().addAll(addRow(buttonRow1).view(), row2, row3, createLastRow());
 
         initBindings();
     }
@@ -102,11 +114,32 @@ public class Keyboard {
         return toggleButton;
     }
 
+    private HBox createLastRow(){
+        final HBox row5 = new HBox();
+        row5.setSpacing(10);
+        row5.setPadding(new Insets(10, 10, 10, 10));
+
+        Button b1 = createButton("");
+        b1.setPrefSize(64, 48);
+        b1.setDisable(true);
+
+        Button b2 = createButton("");
+        b2.setPrefSize(64, 48);
+        b2.setDisable(true);
+
+        Button b3 = createButton("");
+        b3.setPrefSize(64, 48);
+        b3.setDisable(true);
+
+        row5.getChildren().addAll(b1, b2, spaceBar, b3);
+
+        return row5;
+    }
+
     private Button createButton(String text) {
         Button button = new Button(text);
         button.setStyle("-fx-base: beige;");
         button.setFont(font("Candara", BOLD, REGULAR, 12));
-        button.setPrefSize(128, 48);
         return button;
     }
 
@@ -128,6 +161,9 @@ public class Keyboard {
         backspace.setOnAction(event -> initKeyEvent(backspace, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
                 BACK_SPACE, false, false, false, false));
         backspace.getScene().getAccelerators().put(new KeyCodeCombination(BACK_SPACE), () -> fire(backspace));
+        spaceBar.setOnAction(event -> initKeyEvent(spaceBar, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
+                SPACE, false, false, false, false));
+        spaceBar.getScene().getAccelerators().put(new KeyCodeCombination(SPACE), () -> fire(spaceBar));
     }
 
     private void fire(Button button) {
