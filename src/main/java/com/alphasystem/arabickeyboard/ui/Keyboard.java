@@ -104,9 +104,9 @@ public class Keyboard {
 
     private Button createButton(String text) {
         Button button = new Button(text);
+        button.setStyle("-fx-base: beige;");
         button.setFont(font("Candara", BOLD, REGULAR, 12));
         button.setPrefSize(128, 48);
-        button.setStyle("font-variant: small-caps");
         return button;
     }
 
