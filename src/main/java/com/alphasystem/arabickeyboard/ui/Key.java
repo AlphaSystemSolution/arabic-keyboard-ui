@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCodeCombination;
 
 import static javafx.beans.binding.Bindings.when;
 import static javafx.geometry.NodeOrientation.RIGHT_TO_LEFT;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontPosture.REGULAR;
 import static javafx.scene.text.FontWeight.BOLD;
@@ -53,7 +54,19 @@ public class Key {
                 button.fire();
                 button.disarm();
             });
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode, SHIFT_DOWN), () -> {
+                button.arm();
+                button.fire();
+                button.disarm();
+            });
         }
+        button.setOnMouseClicked(event -> {
+            if (isShiftPressed()) {
+                button.arm();
+                button.fire();
+                button.disarm();
+            }
+        });
     }
 
     public KeyCode getKeyCode() {

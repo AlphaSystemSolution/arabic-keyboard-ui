@@ -145,7 +145,8 @@ public class Keyboard {
 
     private void initBindings() {
         shift1.selectedProperty().bindBidirectional(shift2.selectedProperty());
-        vBox.addEventFilter(KeyEvent.KEY_PRESSED, event -> shift1.setSelected(event.isShiftDown()));
+        vBox.addEventFilter(KEY_PRESSED, event -> shift1.setSelected(event.isShiftDown()));
+        vBox.addEventFilter(KEY_RELEASED, event -> shift1.setSelected(event.isShiftDown()));
         buttonRow1.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
         buttonRow2.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
         buttonRow3.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
@@ -161,7 +162,7 @@ public class Keyboard {
         backspace.setOnAction(event -> initKeyEvent(backspace, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
                 BACK_SPACE, false, false, false, false));
         backspace.getScene().getAccelerators().put(new KeyCodeCombination(BACK_SPACE), () -> fire(backspace));
-        spaceBar.setOnAction(event -> initKeyEvent(spaceBar, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
+        spaceBar.setOnAction(event -> initKeyEvent(spaceBar, KEY_TYPED, " ", " ",
                 SPACE, false, false, false, false));
         spaceBar.getScene().getAccelerators().put(new KeyCodeCombination(SPACE), () -> fire(spaceBar));
     }
