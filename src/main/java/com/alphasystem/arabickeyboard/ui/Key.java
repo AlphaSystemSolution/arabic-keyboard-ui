@@ -49,24 +49,20 @@ public class Key {
 
     public void setAccelerator() {
         if (keyCode != null) {
-            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), () -> {
-                button.arm();
-                button.fire();
-                button.disarm();
-            });
-            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode, SHIFT_DOWN), () -> {
-                button.arm();
-                button.fire();
-                button.disarm();
-            });
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), () -> fire());
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode, SHIFT_DOWN), () -> fire());
         }
         button.setOnMouseClicked(event -> {
             if (isShiftPressed()) {
-                button.arm();
-                button.fire();
-                button.disarm();
+                fire();
             }
         });
+    }
+
+    private void fire() {
+        button.arm();
+        button.fire();
+        button.disarm();
     }
 
     public KeyCode getKeyCode() {
