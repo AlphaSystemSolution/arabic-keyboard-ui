@@ -1,9 +1,14 @@
-package com.alphasystem.arabickeyboard.ui;
+package com.alphasystem.arabickeyboard.ui.skin;
 
+import com.alphasystem.arabickeyboard.ui.Key;
+import com.alphasystem.arabickeyboard.ui.KeyboardRow;
+import com.alphasystem.arabickeyboard.ui.KeyboardView;
+import com.alphasystem.arabickeyboard.ui.KeyboardView.OutputType;
 import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.SkinBase;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -16,11 +21,11 @@ import java.util.List;
 import static com.alphasystem.arabic.model.ArabicLetterType.*;
 import static com.alphasystem.arabic.model.ArabicWord.getWord;
 import static com.alphasystem.arabic.model.DiacriticType.*;
+import static com.alphasystem.arabickeyboard.ui.Key.getText;
 import static java.lang.Double.POSITIVE_INFINITY;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCode.COMMA;
 import static javafx.scene.input.KeyCode.SPACE;
 import static javafx.scene.input.KeyEvent.*;
 import static javafx.scene.layout.Priority.ALWAYS;
@@ -31,8 +36,7 @@ import static javafx.scene.text.FontWeight.BOLD;
 /**
  * @author sali
  */
-@Deprecated
-public class Keyboard {
+public class KeyboardSkin extends SkinBase<KeyboardView> {
 
     private List<Key> buttonRow1 = asList(
             new Key(DDAD.toUnicode(), FATHA.toUnicode(), Q),
@@ -70,7 +74,7 @@ public class Keyboard {
             new Key(getWord(LAM, ALIF).toUnicode(), getWord(LAM, ALIF_MADDAH).toUnicode(), B),
             new Key(ALIF_MAKSURA.toUnicode(), ALIF_MADDAH.toUnicode(), N),
             new Key(TA_MARBUTA.toUnicode(), valueOf('\u2019'), M),
-            new Key(WAW.toUnicode(), valueOf('\u002C'), COMMA),
+            new Key(WAW.toUnicode(), valueOf('\u002C'), KeyCode.COMMA),
             new Key(ZAIN.toUnicode(), valueOf('\u002E'), PERIOD),
             new Key(DTHA.toUnicode(), valueOf('\u061F'), SLASH));
 
@@ -78,11 +82,39 @@ public class Keyboard {
     private ToggleButton shift2;
     private Button backspace;
     private Button spaceBar;
-    private Node target;
-    private VBox vBox;
+    private VBox vBox = new VBox();
 
-    public Keyboard(Node target) {
-        this.target = target;
+    public KeyboardSkin(KeyboardView control) {
+        super(control);
+
+        initializeSkin();
+        initBindings();
+    }
+
+    private static ToggleButton createShiftButton() {
+        ToggleButton toggleButton = new ToggleButton("Shift");
+        toggleButton.setStyle("-fx-base: beige;");
+        toggleButton.setPrefSize(128, 48);
+        toggleButton.setFont(font("Candara", BOLD, REGULAR, 12));
+        return toggleButton;
+    }
+
+    public void setAccelerators() {
+        buttonRow1.forEach(Key::setAccelerator);
+        buttonRow2.forEach(Key::setAccelerator);
+        buttonRow3.forEach(Key::setAccelerator);
+        backspace.setOnAction(event -> initKeyEvent(backspace, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
+                BACK_SPACE, false, false, false, false));
+        backspace.getScene().getAccelerators().put(new KeyCodeCombination(BACK_SPACE), () -> fire(backspace));
+        spaceBar.setOnAction(event -> initKeyEvent(spaceBar, KEY_TYPED, " ", " ", SPACE, false, false, false, false));
+        spaceBar.getScene().getAccelerators().put(new KeyCodeCombination(SPACE), () -> fire(spaceBar));
+    }
+
+    public void shiftPressed() {
+        shift1.setSelected(true);
+    }
+
+    private void initializeSkin() {
         vBox = new VBox();
         vBox.setSpacing(10);
         vBox.setPadding(new Insets(10, 10, 10, 10));
@@ -104,18 +136,45 @@ public class Keyboard {
 
         vBox.getChildren().addAll(addRow(buttonRow1).view(), row2, row3, createLastRow());
 
-        initBindings();
+        getChildren().addAll(vBox);
     }
 
-    private static ToggleButton createShiftButton() {
-        ToggleButton toggleButton = new ToggleButton("Shift");
-        toggleButton.setStyle("-fx-base: beige;");
-        toggleButton.setPrefSize(128, 48);
-        toggleButton.setFont(font("Candara", BOLD, REGULAR, 12));
-        return toggleButton;
+    private Button createButton(String text) {
+        Button button = new Button(text);
+        button.setStyle("-fx-base: beige;");
+        button.setFont(font("Candara", BOLD, REGULAR, 12));
+        return button;
     }
 
-    private HBox createLastRow(){
+    private KeyboardRow addRow(List<Key> row) {
+        KeyboardRow keyboardRow = new KeyboardRow();
+        row.forEach(key -> addRow(keyboardRow, key));
+        return keyboardRow;
+    }
+
+    private void addRow(KeyboardRow keyboardRow, Key key) {
+        final Button button = key.getButton();
+        button.setOnAction(event -> {
+            initKeyEvent(button, KEY_TYPED, key.getText(), key.getText(), key.getKeyCode(), false, false, false, false);
+            if (key.isShiftPressed()) {
+                shift1.setSelected(false);
+            }
+        });
+        keyboardRow.addKey(key);
+    }
+
+    private void initKeyEvent(Button button, EventType<KeyEvent> eventType, String character,
+                              String text, KeyCode keyCode, boolean shiftDown, boolean controlDown,
+                              boolean altDown, boolean metaDown) {
+        Node target = getSkinnable().getTarget();
+        OutputType outputType = getSkinnable().getOutputType();
+        KeyEvent keyEvent = new KeyEvent(button, target, eventType, getText(character, outputType),
+                getText(text, outputType), keyCode, shiftDown, controlDown,
+                altDown, metaDown);
+        target.fireEvent(keyEvent);
+    }
+
+    private HBox createLastRow() {
         final HBox row5 = new HBox();
         row5.setSpacing(10);
         row5.setPadding(new Insets(10, 10, 10, 10));
@@ -137,13 +196,6 @@ public class Keyboard {
         return row5;
     }
 
-    private Button createButton(String text) {
-        Button button = new Button(text);
-        button.setStyle("-fx-base: beige;");
-        button.setFont(font("Candara", BOLD, REGULAR, 12));
-        return button;
-    }
-
     private void initBindings() {
         shift1.selectedProperty().bindBidirectional(shift2.selectedProperty());
         vBox.addEventFilter(KEY_PRESSED, event -> shift1.setSelected(event.isShiftDown()));
@@ -153,59 +205,10 @@ public class Keyboard {
         buttonRow3.forEach(key -> key.shiftPressedProperty().bind(shift1.selectedProperty()));
     }
 
-    /**
-     *
-     */
-    public void setAccelerators() {
-        buttonRow1.forEach(Key::setAccelerator);
-        buttonRow2.forEach(Key::setAccelerator);
-        buttonRow3.forEach(Key::setAccelerator);
-        backspace.setOnAction(event -> initKeyEvent(backspace, KEY_PRESSED, CHAR_UNDEFINED, CHAR_UNDEFINED,
-                BACK_SPACE, false, false, false, false));
-        backspace.getScene().getAccelerators().put(new KeyCodeCombination(BACK_SPACE), () -> fire(backspace));
-        spaceBar.setOnAction(event -> initKeyEvent(spaceBar, KEY_TYPED, " ", " ",
-                SPACE, false, false, false, false));
-        spaceBar.getScene().getAccelerators().put(new KeyCodeCombination(SPACE), () -> fire(spaceBar));
-    }
-
     private void fire(Button button) {
         button.arm();
         button.fire();
         button.disarm();
     }
 
-    private void initKeyEvent(Button button, EventType<KeyEvent> eventType, String character,
-                              String text, KeyCode keyCode, boolean shiftDown, boolean controlDown,
-                              boolean altDown, boolean metaDown) {
-        KeyEvent keyEvent = new KeyEvent(button, target, eventType, character, text,
-                keyCode, shiftDown, controlDown,
-                altDown, metaDown);
-        target.fireEvent(keyEvent);
-    }
-
-    private KeyboardRow addRow(List<Key> row) {
-        KeyboardRow keyboardRow = new KeyboardRow();
-        row.forEach(key -> addRow(keyboardRow, key));
-        return keyboardRow;
-    }
-
-    private void addRow(KeyboardRow keyboardRow, Key key) {
-        final Button button = key.getButton();
-        button.setOnAction(event -> {
-            initKeyEvent(button, KEY_TYPED, key.getText(), key.getText(), key.getKeyCode(),
-                    false, false, false, false);
-            if (key.isShiftPressed()) {
-                shift1.setSelected(false);
-            }
-        });
-        keyboardRow.addKey(key);
-    }
-
-    public void shiftPressed() {
-        shift1.setSelected(true);
-    }
-
-    public VBox view() {
-        return vBox;
-    }
 }

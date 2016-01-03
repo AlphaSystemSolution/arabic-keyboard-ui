@@ -49,9 +49,9 @@ public class KeyboardApp extends Application {
         textArea.setStyle("-fx-border-color: transparent; -fx-border-radius: 2; -fx-border-insets: 6, 6, 6, 6; " +
                 "-fx-border-style: solid inside, solid outside;");
 
-        Keyboard keyboard = new Keyboard(textArea);
+        KeyboardView keyboardView = new KeyboardView();
+        keyboardView.setTarget(textArea);
 
-        final VBox keyboardView = keyboard.view();
         keyboardView.setStyle("-fx-border-color: transparent; -fx-border-radius: 2; -fx-border-insets: 6, 6, 6, 6; " +
                 "-fx-border-style: solid inside, dotted outside;");
         keyboardView.setOnMouseClicked(event -> keyboardView.requestFocus());
@@ -60,7 +60,7 @@ public class KeyboardApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
 
-        keyboard.setAccelerators();
+        keyboardView.initAccelerators();
         textArea.addEventFilter(KEY_TYPED, event -> {
             final String s = event.getCharacter();
             char c = s.charAt(0);
@@ -71,7 +71,7 @@ public class KeyboardApp extends Application {
 
         textArea.addEventFilter(KEY_PRESSED, event -> {
             if (event.isShiftDown()) {
-                keyboard.shiftPressed();
+                keyboardView.shiftPressed();
             }
         });
 
