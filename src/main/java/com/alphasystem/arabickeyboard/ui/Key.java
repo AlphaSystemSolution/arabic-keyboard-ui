@@ -75,8 +75,8 @@ public class Key {
 
     public void setAccelerator() {
         if (keyCode != null) {
-            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), () -> fire());
-            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode, SHIFT_DOWN), () -> fire());
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode), this::fire);
+            button.getScene().getAccelerators().put(new KeyCodeCombination(keyCode, SHIFT_DOWN), this::fire);
         }
         button.setOnMouseClicked(event -> {
             if (isShiftPressed()) {
